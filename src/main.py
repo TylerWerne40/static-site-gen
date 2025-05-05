@@ -1,4 +1,5 @@
 from textnode import TextNode, TextType
+import sys
 import os, re
 import shutil
 from markdown_blocks import markdown_to_html_node
@@ -27,7 +28,7 @@ def extract_title(markdown):
             return i[2:].lstrip().rstrip()
     return ''
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     
 
     os.makedirs(dest_dir_path, exist_ok=True)
@@ -38,10 +39,10 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
         src_path = os.path.join(dir_path_content, obj)
         dest_path = os.path.join(dest_dir_path, obj)
         if os.path.isdir(src_path):
-            generate_pages_recursive(src_path, template_path, dest_path)
+            generate_pages_recursive(src_path, template_path, dest_path, basepath)
         else:
             dest_path = os.path.join(dest_dir_path, obj.replace('.md', '.html'))
-            generate_page(src_path, template_path, dest_path)
+            generate_page(src_path, template_path, dest_path, basepath)
     return
 
 def extract_title(markdown):
@@ -52,7 +53,7 @@ def extract_title(markdown):
     raise ValueError("no title found")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f'Generating page form {from_path} to {dest_path} using {template_path}')
     fro = open(from_path, 'r')
     f_contents = fro.read()
@@ -75,14 +76,14 @@ def generate_page(from_path, template_path, dest_path):
     return
 
 def main():
-    basepath = sys.argv()
+    basepath = sys.argv[1]
     if basepath is None:
         basepath = '/'
 
     tn = TextNode('hi', TextType.BOLD, 'https://www.boot.dev')
     print(tn)
     copy_folder('./static', './docs')
-    # generate_page('./content/index.md', './template.html', './public/index.html')
-    generate_pages_recursive(basepath + '/content/', basepath + '/template.html', basepath + '/docs/')
+    generate_page('./content/index.md', './template.html', './docs/index.html', basepath)
+    generate_pages_recursive('./content/', './template.html', './docs/', basepath)
 
 main()
