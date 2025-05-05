@@ -67,16 +67,22 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(f_contents)
     t_contents = t_contents.replace(r'{{ Title }}', title)
     t_contents = t_contents.replace(r'{{ Content }}', f_html)
+    t_contents = t_contents.replace(r'href="/', rf'href={basepath}')
+    t_contents = t_contents.replace(r'src="/', rf'src={basepath}')
     to = open(dest_path, 'w')
     to.write(t_contents)
     to.close()
     return
 
 def main():
+    basepath = sys.argv()
+    if basepath is None:
+        basepath = '/'
+
     tn = TextNode('hi', TextType.BOLD, 'https://www.boot.dev')
     print(tn)
-    copy_folder('./static', './public')
+    copy_folder('./static', './docs')
     # generate_page('./content/index.md', './template.html', './public/index.html')
-    generate_pages_recursive('./content/', './template.html', './public/')
+    generate_pages_recursive(basepath + '/content/', basepath + '/template.html', basepath + '/docs/')
 
 main()
